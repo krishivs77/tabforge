@@ -11,4 +11,4 @@ data/output/
 *.mp3
 *.mid
 *.csv
-*.npz
+*.npz.vscode/
