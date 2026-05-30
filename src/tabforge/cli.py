@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 
 import typer
@@ -47,6 +48,11 @@ def from_notes(
         "-o",
         help="Optional path to save the generated tab.",
     ),
+    debug_json: Path | None = typer.Option(
+        None,
+        "--debug-json",
+        help="Optional path to save chosen note positions as JSON.",
+    ),
 ) -> None:
     """Generate ASCII guitar tab from comma-separated MIDI pitches."""
     pitches = parse_pitch_list(notes)
@@ -59,6 +65,21 @@ def from_notes(
         out.parent.mkdir(parents=True, exist_ok=True)
         out.write_text(tab + "\n")
         typer.echo(f"\nSaved tab to {out}")
+
+    if debug_json is not None:
+        debug_json.parent.mkdir(parents=True, exist_ok=True)
+
+        debug_data = [
+            {
+                "pitch": position.pitch,
+                "string": position.string,
+                "fret": position.fret,
+            }
+            for position in positions
+        ]
+
+        debug_json.write_text(json.dumps(debug_data, indent=2) + "\n")
+        typer.echo(f"Saved debug JSON to {debug_json}")
 
 
 if __name__ == "__main__":
