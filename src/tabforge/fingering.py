@@ -16,3 +16,13 @@ def choose_best_position(pitch: int) -> GuitarPosition:
         raise ValueError(f"MIDI pitch {pitch} is not playable on guitar.")
     
     return min(positions, key=lambda position: position.string)
+
+def choose_positions_for_melody(pitches: list[int]) -> list[GuitarPosition]:
+    """Choose guitar positions for a sequence of MIDI pitches."""
+    positions = []
+
+    for pitch in pitches:
+        position = choose_best_position(pitch)
+        positions.append(position)
+    
+    return positions

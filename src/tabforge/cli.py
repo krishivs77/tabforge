@@ -1,6 +1,6 @@
 import typer
 
-from tabforge.fingering import choose_best_position
+from tabforge.fingering import choose_positions_for_melody
 
 app = typer.Typer(help="TabForge: vocal melody to playable guitar tabs.")
 
@@ -14,13 +14,13 @@ def main() -> None:
 def demo() -> None:
     """Choose demo guitar positions from hardcoded MIDI notes."""
     melody = [64, 66, 68, 71, 73]
+    positions = choose_positions_for_melody(melody)
 
     typer.echo("Chosen guitar positions:")
 
-    for pitch in melody:
-        position = choose_best_position(pitch)
+    for position in positions:
         typer.echo(
-            f"pitch={pitch}, string={position.string}, fret={position.fret}"
+            f"pitch={position.pitch}, string={position.string}, fret={position.fret}"
         )
 
 
