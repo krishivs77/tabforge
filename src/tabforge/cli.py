@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import typer
 
 from tabforge.fingering import choose_positions_for_melody
@@ -37,13 +39,26 @@ def demo() -> None:
 
 
 @app.command("from-notes")
-def from_notes(notes: str) -> None:
+def from_notes(
+    notes: str,
+    out: Path | None = typer.Option(
+        None,
+        "--out",
+        "-o",
+        help="Optional path to save the generated tab.",
+    ),
+) -> None:
     """Generate ASCII guitar tab from comma-separated MIDI pitches."""
     pitches = parse_pitch_list(notes)
     positions = choose_positions_for_melody(pitches)
     tab = render_ascii_tab(positions)
 
     typer.echo(tab)
+
+    if out is not None:
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(tab + "\n")
+        typer.echo(f"\nSaved tab to {out}")
 
 
 if __name__ == "__main__":
