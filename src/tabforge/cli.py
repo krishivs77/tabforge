@@ -5,6 +5,7 @@ import typer
 
 from tabforge.fingering import choose_positions_for_melody
 from tabforge.tab_render import render_ascii_tab
+from tabforge.models import NoteEvent
 
 
 def parse_pitch_list(notes: str) -> list[int]:
@@ -20,6 +21,22 @@ def parse_pitch_list(notes: str) -> list[int]:
         pitches.append(int(note))
     
     return pitches
+
+def create_note_events_from_pitches(pitches: list[int]) -> list[NoteEvent]:
+    """Create simple evenly spaced note events from MIDI pitches."""
+    note_events = []
+
+    for index, pitch in enumerate(pitches):
+        note_events.append(
+            NoteEvent(
+                pitch=pitch,
+                start=float(index),
+                end=float(index + 1),
+                confidence=1.0,
+            )
+        )
+
+    return note_events
 
 app = typer.Typer(help="TabForge: vocal melody to playable guitar tabs.")
 
@@ -56,7 +73,8 @@ def from_notes(
 ) -> None:
     """Generate ASCII guitar tab from comma-separated MIDI pitches."""
     pitches = parse_pitch_list(notes)
-    positions = choose_positions_for_melody(pitches)
+    note_events = create_note_events_from_pitches(pitches)
+    positions = choose_positions_for_melody([event.pitch for event in note_events])
     tab = render_ascii_tab(positions)
 
     typer.echo(tab)
@@ -71,11 +89,14 @@ def from_notes(
 
         debug_data = [
             {
-                "pitch": position.pitch,
+                "pitch": event.pitch,
+                "start": event.start,
+                "end": event.end,
+                "confidence": event.confidence,
                 "string": position.string,
                 "fret": position.fret,
             }
-            for position in positions
+            for event, position in zip(note_events, positions)
         ]
 
         debug_json.write_text(json.dumps(debug_data, indent=2) + "\n")
